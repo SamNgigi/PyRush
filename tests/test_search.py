@@ -2,7 +2,7 @@ import pytest
 
 from typing import List
 
-from src.search.binary_search import Search
+from src.data_structures_algorithms.search.search import Search
 
 
 
