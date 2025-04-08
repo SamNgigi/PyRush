@@ -5,6 +5,9 @@ class Search:
 
     @staticmethod
     def binary_search_iterative(nums: List[int], target: int) -> int:
+        """
+        Iterative version of the binary search algorithm
+        """
         
         start: int = 0;
         end: int = len(nums) - 1
@@ -25,7 +28,10 @@ class Search:
 
     @staticmethod
     def binary_search_recursive(nums: List[int], target: int) -> int:
-        
+        """
+        Iterative version of the binary search algorithm
+        """
+
         start: int = 0
         stop: int = len(nums) - 1
 

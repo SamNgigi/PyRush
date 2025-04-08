@@ -3,7 +3,7 @@ import ast
 
 
 from dataclasses import dataclass
-from typing import List, OrderedDict, Union
+from typing import List, Optional, OrderedDict, Union
 from collections import defaultdict
 
 class GamePlay:
@@ -79,7 +79,7 @@ class GamePlay:
         tree_node: ast.AST,
         parent_is_class: bool = False,
         parent_is_function: bool = False,
-        current_class: Union[str, None] = None
+        current_class: Optional[str] = None
     ) -> list:
         
         results = []
