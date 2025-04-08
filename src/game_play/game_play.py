@@ -63,21 +63,58 @@ class GamePlay:
                         # we skip it for now. We may log it
                         continue
 
-                    # We can walk the AST, looking for FunctionDef nodes
-                    for node in ast.walk(tree):
-                        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
-                            
-                            class_name = GamePlay.get_enclosing_class_name(node, tree)
+                    # Gathering only module-level and class-level function definitions
+                    # We do a custome alk and pass the parent type
+                    method_nodes = GamePlay.gather_functions(tree)
 
-                            method_info = {
-                                "name": node.name,
-                                "lineno": node.lineno,
-                                "class": class_name
-                            }
-
-                            methods_by_file[full_path].append(method_info)
+                    # Adding them to our structure
+                    for method in method_nodes:
+                        methods_by_file[full_path].append(method)
 
         return methods_by_file
+
+
+    @staticmethod
+    def gather_functions(
+        tree_node: ast.AST,
+        parent_is_class: bool = False,
+        parent_is_function: bool = False,
+        current_class: Union[str, None] = None
+    ) -> list:
+        
+        results = []
+
+        # If this node is a class, any functions in its body will be considere "class methods"
+        if isinstance(tree_node, ast.ClassDef):
+            current_class = tree_node.name
+            parent_is_class = True
+            parent_is_function = False # you can't be a function if you're in a class
+        
+        elif isinstance(tree_node, ast.FunctionDef):
+            # Only keep this function if parent is module or class
+            if not parent_is_function:
+                function_info = {
+                    "name": tree_node.name,
+                    "class": current_class ,
+                    "lineno": tree_node.lineno,
+                }
+                results.append(function_info)
+            # Updateing the state so that children of this function are considered nested
+            parent_is_function = True
+
+        # Recurse into child nodes
+        for child in ast.iter_child_nodes(tree_node):
+
+            results.extend(
+                GamePlay.gather_functions(
+                    child,
+                    parent_is_class = parent_is_class,
+                    parent_is_function = parent_is_function,
+                    current_class = current_class
+                )
+            )
+
+        return results
 
     @staticmethod
     def get_enclosing_class_name(func_node: ast.AST, tree:ast.AST) -> Union[str, None]:
@@ -179,7 +216,7 @@ class GamePlay:
             print("-"*40)
 
             for short_filename, methods in file_dict.items():
-                print(short_filename)
+                print(short_filename.title())
                 for method in methods:
                     print(f"    {method['selector']:6}      {method['display_name']}")
             print()
