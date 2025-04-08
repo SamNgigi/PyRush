@@ -7,6 +7,19 @@ from typing import List, OrderedDict
 from collections import defaultdict
 
 class GamePlay:
+
+    @staticmethod
+    def init_game():
+
+        print("Hello World")
+        print("Type q to quit")
+
+        while True:
+            name:str = input("What's your name: ")
+            if name == "q":
+                break
+
+            print(f"Hi {name}")
     
     @staticmethod
     def get_available_methods(_path: str) -> dict[str, list[dict]]:
