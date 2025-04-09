@@ -1,9 +1,12 @@
 import os
 import ast
+import re
+import shutil
+import platform
+import subprocess
 
 
-from dataclasses import dataclass
-from typing import List, Optional, OrderedDict, Union
+from typing import Optional
 from collections import defaultdict
 
 class GamePlay:
@@ -14,16 +17,129 @@ class GamePlay:
         Encapsulates game logic and runs the game
         """
 
-        print("Hello World")
-        print("Type q to quit")
+        
+
+        print("Hi! Welcome to PyRush")
+
+        this_dir: str = os.path.dirname(os.path.abspath(__file__))
+        default_path = os.path.join(this_dir, "..", "data_structures_algorithms")
+        methods_by_file: dict = GamePlay.get_available_methods(default_path)
+        menu,selector_map = GamePlay.build_menu(methods_by_file)
 
         while True:
-            name:str = input("What's your name: ")
-            if name == "q":
+            GamePlay.clear_screen()
+
+            GamePlay.display_menu(menu)
+
+            selected = GamePlay.get_method_choice(selector_map)
+
+            if selected['selector'] == "q":
+                break
+            if selected['selector'] == "t":
+                # TODO: Run pytests on new window
+                print("TODO: Exiting game to run tests")
                 break
 
-            print(f"Hi {name}")
-    
+            GamePlay.edit_method(selected)
+
+
+
+    @staticmethod
+    def clear_screen()->None:
+
+        os.system('cls' if os.name == 'nt' else 'clear')
+
+
+    @staticmethod
+    def edit_method(selected_function: dict)->None:
+
+        file_path: str = selected_function['file_path']
+        method_name: str = selected_function['function_name']
+
+        # Reading original source code
+        with open(file_path, "r", encoding="utf-8") as f:
+            original_code = f.read()
+
+        # Parse into AST
+        tree = ast.parse(original_code, filename=file_path)
+
+        # Searching for the function definition name
+        target_node = None
+        for node in ast.walk(tree):
+            # Checking standard (non_async) functions
+            if isinstance(node, ast.FunctionDef) and node.name == method_name:
+                target_node = node
+                break
+
+        if not target_node:
+            print(f"Method '{method_name}' not found in '{file_path}'")
+            return
+        
+        # Stripping existing statements but retains docstring(if at the beginning) and decorators
+        new_body = []
+        # If the first statement is an Expr(Str), that's a docstring
+        if(
+            target_node.body and
+            isinstance(target_node.body[0], ast.Expr) and
+            isinstance(target_node.body[0].value, ast.Constant)
+        ):
+            new_body.append(target_node.body[0])
+
+        # Insert placeholder
+        placeholder = ast.Expr(value=ast.Constant(value=f"#TODO: implement {method_name}"))
+        new_body.append(placeholder)
+
+        # Replacing the older body
+        target_node.body = new_body
+
+        # Reconstructing the entire module as a string
+        new_code = ast.unparse(tree)
+
+        # Writing to a temporary file
+        temp_path = os.path.join(
+            os.path.dirname(file_path),
+            f"temp_{os.path.basename(file_path)}"
+        )
+        with open(temp_path, "w", encoding="utf-8") as temp:
+            temp.write(new_code)
+
+        # We open the editor roughly around the old function's line number
+        # ast.unparse can shift lines, but this is usually "close enough"
+        cursor_line = target_node.lineno + 1
+        
+        GamePlay.open_editor(temp_path, cursor_line)
+        
+        # Replacing original with temp
+        shutil.move(temp_path, file_path)
+
+        
+
+    @staticmethod
+    def open_editor(file_path, cursor_line=1)->None:
+        editor = os.getenv("EDITOR", "nvim")
+
+        if platform.system().lower().startswith("win"):
+            # use Gitbash for Windows
+            command = f"bash -c \"{editor} '+call cursor({cursor_line},0)' '{file_path}'\""
+        else:
+            # Linux/Mac
+            command = f"{editor} '+call cursor({cursor_line}, 0)' '{file_path}'"
+
+        subprocess.call(command, shell=True)
+
+    @staticmethod
+    def get_method_choice(selector_map: dict)-> dict:
+        
+        while True:
+            selection = input().strip()
+            if selection in ("q", "t"):
+                return {"selector": selection}
+            if selection in selector_map:
+                return selector_map[selection]
+            print("Invalid choice. Please try again")
+
+        
+
     @staticmethod
     def get_available_methods(_path: str) -> dict[str, list[dict]]:
         """
@@ -97,6 +213,8 @@ class GamePlay:
                     "name": tree_node.name,
                     "class": current_class ,
                     "lineno": tree_node.lineno,
+                    "end_lineno": tree_node.end_lineno,
+                    "col_offset": tree_node.col_offset,
                 }
                 results.append(function_info)
             # Updateing the state so that children of this function are considered nested
@@ -116,40 +234,36 @@ class GamePlay:
 
         return results
 
-    @staticmethod
-    def get_enclosing_class_name(func_node: ast.AST, tree:ast.AST) -> Union[str, None]:
-        """
-        Given a function node and the full AST, tries to find the immediate class that
-        enclosed this function, if any. Returns Noe if not enclosed by a class.
-        """
-        for node in ast.walk(tree):
-            if isinstance(node, ast.ClassDef):
-                for subnode in node.body:
-                    if subnode is func_node:
-                        return node.name
-                    # If subnode is also a compound (nexted classes, etc) we can go deeper
-        return None
-
 
     @staticmethod
-    def build_menu(methods_by_file: dict)->dict:
+    def build_menu(methods_by_file: dict)->tuple[dict, dict]:
         """
         Build a nested structure suitable for display our game menu
         
-        Returns dict of the form
-
+        Returns 2 dicts:
+        MENU
         {
             "FolderName":{
                 "ShortFileName": [
-                    {"selector": "1.01", "display_name": "Search.binary_search_iterative"},
+                    {
+                        "selector": "1.01", 
+                        "display_name": "Search.binary_search_iterative",
+                        "file_path": "search/search.py",
+                        "lineno": 24,
+                        "end_lineno": 50,
+                        "col_offset": 10
+                    },
                     ...
                 ]
             },
             ...
         }
+        SELECTOR_MAP
+        {"1.01": {<the same dict>}}
 
         """
         menu = defaultdict(lambda: defaultdict(list))
+        selector_map = {}
 
         # Counter to keep track of global file index
         file_counter: int = 1
@@ -158,8 +272,9 @@ class GamePlay:
         sorted_files = sorted(methods_by_file.keys())
 
         for file_path in sorted_files:
-            folder_name = GamePlay.get_top_folder(file_path)
+            top_folder = GamePlay.get_top_folder(file_path)
             short_file_name = os.path.splitext(os.path.basename(file_path))[0]
+
 
             # Sorting methods for consistency
             method_list = sorted(methods_by_file[file_path], key=lambda method: method['lineno'])
@@ -175,16 +290,25 @@ class GamePlay:
 
                 selector = f"{file_counter}.{method_suffix}"
 
-                selector_info = {"selector": selector, "display_name": method_name }
+                selector_info = {
+                    "selector": selector, 
+                    "display_name": method_name,
+                    "function_name": method['name'],
+                    "file_path": file_path,
+                    "lineno": method['lineno'],
+                    "end_lineno": method['end_lineno'],
+                    "col_offset": method['col_offset'],
+                }
 
-                menu[folder_name][short_file_name].append(selector_info)
+                menu[top_folder][short_file_name].append(selector_info)
+                selector_map[selector] = selector_info
 
                 method_counter += 1
 
             file_counter += 1
 
 
-        return menu
+        return menu, selector_map
 
     @staticmethod
     def get_top_folder(file_path: str) -> str:
@@ -212,14 +336,21 @@ class GamePlay:
         # For each top-level folder
         for folder_name, file_dict in menu.items():
             print(folder_name)
-            print(f"{'File':<25}Method") # Performance wise print("File" + " " * 20 + Menu) is considered faster
-            print("-"*40)
+            print(f"{'File':<20}Method") # Performance wise print("File" + " " * 20 + Menu) is considered faster
+            print("-"*100)
 
             for short_filename, methods in file_dict.items():
-                print(short_filename.title())
+                print(f"\n{short_filename.title()}")
                 for method in methods:
-                    print(f"    {method['selector']:6}      {method['display_name']}")
+                    # For fixed-width formatting with appropriate spacing
+                    selector = method['selector']
+                    display_name = method['display_name']
+                    
+                    print(f"    {selector:<15} {display_name:<40}")
             print()
+            print("q - Quit")
+            print("t - Run Tests and Quit")
+            print("Choose a method to implement (e.g., 1.02) 'q' to quit or 't' to run tests and Exit")
 
 
 
@@ -230,9 +361,10 @@ class GamePlay:
 if __name__ == "__main__":
 
     # Getting this file current directory
-    this_dir = os.path.dirname(os.path.abspath(__file__))
-    ds_algo_path = os.path.join(this_dir, "..", "data_structures_algorithms")
-
-    methods_dict = GamePlay.get_available_methods(ds_algo_path)
-    menu = GamePlay.build_menu(methods_dict)
-    GamePlay.display_menu(menu)
+    # this_dir = os.path.dirname(os.path.abspath(__file__))
+    # ds_algo_path = os.path.join(this_dir, "..", "data_structures_algorithms")
+    #
+    # methods_dict = GamePlay.get_available_methods(ds_algo_path)
+    # menu, selector_map = GamePlay.build_menu(methods_dict)
+    # GamePlay.display_menu(menu)
+    GamePlay.init_game()
