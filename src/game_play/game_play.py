@@ -86,14 +86,18 @@ class GamePlay:
             new_body.append(target_node.body[0])
 
         # Insert placeholder
-        placeholder = ast.Expr(value=ast.Constant(value=f"#TODO: implement {method_name}"))
-        new_body.append(placeholder)
+        new_body.append(ast.Pass()) # inserting 'pass' for now
 
         # Replacing the older body
         target_node.body = new_body
 
         # Reconstructing the entire module as a string
         new_code = ast.unparse(tree)
+
+        # Adding comments by replacing pass
+        # We use regex to take into consideration indentation before 'pass'
+        indent_pattern = re.compile(r'(\s*)pass\s*$', re.MULTILINE)
+        new_code = indent_pattern.sub(r'\1#TODO: implement ' + method_name + '\n\n', new_code)
 
         # Writing to a temporary file
         temp_path = os.path.join(
@@ -105,9 +109,10 @@ class GamePlay:
 
         # We open the editor roughly around the old function's line number
         # ast.unparse can shift lines, but this is usually "close enough"
-        cursor_line = target_node.lineno + 1
+        cursor_line = target_node.end_lineno - 1 if target_node.end_lineno else target_node.lineno + 1
+        cursor_col = target_node.end_col_offset + 1 if target_node.end_col_offset else target_node.col_offset + 1
         
-        GamePlay.open_editor(temp_path, cursor_line)
+        GamePlay.open_editor(temp_path, cursor_line, cursor_col)
         
         # Replacing original with temp
         shutil.move(temp_path, file_path)
@@ -115,15 +120,15 @@ class GamePlay:
         
 
     @staticmethod
-    def open_editor(file_path, cursor_line=1)->None:
+    def open_editor(file_path, cursor_line=1, cursor_col=1)->None:
         editor = os.getenv("EDITOR", "nvim")
 
         if platform.system().lower().startswith("win"):
             # use Gitbash for Windows
-            command = f"bash -c \"{editor} '+call cursor({cursor_line},0)' '{file_path}'\""
+            command = f"bash -c \"{editor} '+call cursor({cursor_line},{cursor_col})' '{file_path}'\""
         else:
             # Linux/Mac
-            command = f"{editor} '+call cursor({cursor_line}, 0)' '{file_path}'"
+            command = f"{editor} '+call cursor({cursor_line},{cursor_col})' '{file_path}'"
 
         subprocess.call(command, shell=True)
 

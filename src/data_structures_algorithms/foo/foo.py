@@ -7,5 +7,11 @@ class Foo:
         Params: None:
         Returns: int
         """
-        print("Original code to remove")
-        return 42
+        print("Function to remove")
+        return 40
+
+    @staticmethod
+    def bar() -> int:
+        """This is a single line docstring"""
+        print('Another function to remove')
+        return 44
