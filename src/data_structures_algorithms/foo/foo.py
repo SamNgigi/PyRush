@@ -7,8 +7,7 @@ class Foo:
         Params: None:
         Returns: int
         """
-        print("Function to remove")
-        return 40
+        return 45
 
     @staticmethod
     def bar() -> int:

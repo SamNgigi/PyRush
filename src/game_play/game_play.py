@@ -92,12 +92,12 @@ class GamePlay:
         target_node.body = new_body
 
         # Reconstructing the entire module as a string
-        new_code = ast.unparse(tree)
+        _stub_code = ast.unparse(tree)
 
         # Adding comments by replacing pass
         # We use regex to take into consideration indentation before 'pass'
         indent_pattern = re.compile(r'(\s*)pass\s*$', re.MULTILINE)
-        new_code = indent_pattern.sub(r'\1#TODO: implement ' + method_name + '\n\n', new_code)
+        _stub_code = indent_pattern.sub(r'\1#TODO: Remove this line and implement ' + method_name + '\n\n', _stub_code)
 
         # Writing to a temporary file
         temp_path = os.path.join(
@@ -105,7 +105,9 @@ class GamePlay:
             f"temp_{os.path.basename(file_path)}"
         )
         with open(temp_path, "w", encoding="utf-8") as temp:
-            temp.write(new_code)
+            temp.write(_stub_code)
+
+        unedited_stub = _stub_code
 
         # We open the editor roughly around the old function's line number
         # ast.unparse can shift lines, but this is usually "close enough"
@@ -113,9 +115,17 @@ class GamePlay:
         cursor_col = target_node.end_col_offset + 1 if target_node.end_col_offset else target_node.col_offset + 1
         
         GamePlay.open_editor(temp_path, cursor_line, cursor_col)
-        
-        # Replacing original with temp
-        shutil.move(temp_path, file_path)
+
+        # Checking if code was edited
+        with open(temp_path, "r", encoding="utf-8") as tempf:
+            edited_code = tempf.read()
+
+        if edited_code == unedited_stub:
+            # Just remove temp if we did edit the stub
+            os.remove(temp_path)
+        else:
+            # Replacing original with temp
+            shutil.move(temp_path, file_path)
 
         
 
