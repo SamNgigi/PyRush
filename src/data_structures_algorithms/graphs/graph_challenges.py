@@ -1,0 +1,273 @@
+from typing import List, Union
+from collections import deque
+from sys import maxsize
+
+
+class AENodeGraph:
+
+    def __init__(self, name):
+        self.children = []
+        self.name = name
+
+    def add_child(self, name):
+        self.children.append(AENodeGraph(name))
+        return self
+    
+    def depth_first_search_recursive(self, array):
+        array.append(self.name)
+        for child in self.children:
+            child.depth_first_search(array)
+        return array
+
+    def depth_first_search_iterative(self, array):
+        stack = deque([self])
+
+        while stack:
+            current = stack.pop()
+            array.append(current.name)
+            for child in reversed(current.children):
+                stack.append(child)
+        return array
+    
+    def breadth_first_search(self, array):
+        queue = deque([self])
+
+        while queue:
+            current = queue.popleft()
+            array.append(current.name)
+            for child in current.children:
+                queue.append(child)
+        return array
+
+
+def num_islands(grid: List[List[str]]) -> int:
+    """
+    Given an m x n 2D binary grid grid which represents a map of '1's (land) and '0's (water), return the number of islands.
+
+    An island is surrounded by water and is formed by connecting adjacent lands horizontally or vertically. You may assume all four edges of the grid are all surrounded by water.
+
+     
+
+    Example 1:
+
+    Input: grid = [
+      ["1","1","1","1","0"],
+      ["1","1","0","1","0"],
+      ["1","1","0","0","0"],
+      ["0","0","0","0","0"]
+    ]
+    Output: 1
+    Example 2:
+
+    Input: grid = [
+      ["1","1","0","0","0"],
+      ["1","1","0","0","0"],
+      ["0","0","1","0","0"],
+      ["0","0","0","1","1"]
+    ]
+    Output: 3
+
+    Args: 2D Matrix of strings
+
+    Returns: int - number of islands
+    """
+    if not grid:
+        return 0
+    rows, cols = len(grid), len(grid[0])
+    island_count:int = 0
+    neighbor_coords = [(-1, 0), (1, 0), (0, -1), (0, 1)] # up ,down, left, right
+
+    def dfs_recursive(row: int, col: int):
+        if(row < 0 or col < 0 or row>=rows or col>= cols or grid[row][col] == "0"):
+            return # invalid position
+        
+        grid[row][col] = "0" # instead of using visited
+        for dr, dc in neighbor_coords:
+            dfs_recursive((row+dr),(col+dc))
+
+    def dfs_iterative(row: int, col: int):
+
+        stack = deque([(row, col)])
+
+        while stack:
+
+            cr, cc = stack.pop()
+            grid[cr][cc] = "0"
+
+            for dr, dc in neighbor_coords:
+                nr, nc = (cr + dr), (cc + dc)
+                if(nr < 0 or nc < 0 or nr >= rows or nc >= cols or grid[nr][nc] == "0"): # or (nr, nc) not in visited
+                    continue
+                grid[nr][nc] = "0" # visited.add((nr, nc))
+                stack.append((nr, nc))
+
+    def bfs(r, c):
+        queue = deque([(r, c)])
+        grid[r][c] = "0" # instead of using a visited set i.e visited.add((r, c))
+
+        while queue:
+            cr, cc = queue.popleft()
+            for dr, dc in neighbor_coords:
+                nr, nc = dr + cr, dc + cc 
+                if(nr < 0 or nc < 0 or nr >= rows or nc >= cols or grid[nr][nc] == "0"):
+                    continue
+                queue.append((nr, nc))
+                grid[nr][nc] = "0"
+        
+
+    for r in range(rows):
+        for c in range(cols):
+            if grid[r][c] == "1":
+                dfs_recursive(r, c)
+                island_count += 1
+
+    
+
+
+    return island_count
+
+
+
+def can_visit_all_rooms(rooms: List[List[int]])->bool:
+    """
+    There are n rooms labeled from 0 to n - 1 and all the rooms are locked except for room 0. Your goal is to visit all the rooms. However, you cannot enter a locked room without having its key.
+
+    When you visit a room, you may find a set of distinct keys in it. Each key has a number on it, denoting which room it unlocks, and you can take all of them with you to unlock the other rooms.
+
+    Given an array rooms where rooms[i] is the set of keys that you can obtain if you visited room i, return true if you can visit all the rooms, or false otherwise.
+
+     
+
+    Example 1:
+
+    Input: rooms = [[1],[2],[3],[]]
+    Output: true
+    Explanation: 
+    We visit room 0 and pick up key 1.
+    We then visit room 1 and pick up key 2.
+    We then visit room 2 and pick up key 3.
+    We then visit room 3.
+    Since we were able to visit every room, we return true.
+    Example 2:
+
+    Input: rooms = [[1,3],[3,0,1],[2],[0]]
+    Output: false
+    Explanation: We can not enter room number 2 since the only key that unlocks it is in that room.
+     
+
+    Constraints:
+
+    n == rooms.length
+    2 <= n <= 1000
+    0 <= rooms[i].length <= 1000
+    1 <= sum(rooms[i].length) <= 3000
+    0 <= rooms[i][j] < n
+    All the values of rooms[i] are unique.
+
+    Args: rooms List[List[int]]
+    """
+
+    stack = deque([0])
+    visited = {0}
+    
+    while stack:
+        current = stack.pop()
+
+        for key in rooms[current]:
+            if key not in visited:
+                stack.append(key)
+                visited.add(key)
+
+    return len(rooms) == len(visited)
+
+def flood_fill(image: List[List[int]], sr: int, sc: int, color: int)->List[List[int]]:
+    """
+    You are given an image represented by an m x n grid of integers image, where image[i][j] represents the pixel value of the image. You are also given three integers sr, sc, and color. Your task is to perform a flood fill on the image starting from the pixel image[sr][sc].
+
+    To perform a flood fill:
+
+    Begin with the starting pixel and change its color to color.
+    Perform the same process for each pixel that is directly adjacent (pixels that share a side with the original pixel, either horizontally or vertically) and shares the same color as the starting pixel.
+    Keep repeating this process by checking neighboring pixels of the updated pixels and modifying their color if it matches the original color of the starting pixel.
+    The process stops when there are no more adjacent pixels of the original color to update.
+    Return the modified image after performing the flood fill.
+
+     
+
+    Example 1:
+
+    Input: image = [[1,1,1],[1,1,0],[1,0,1]], sr = 1, sc = 1, color = 2
+
+    Output: [[2,2,2],[2,2,0],[2,0,1]]
+
+    Input: image = [[0,0,0],[0,0,0]], sr = 0, sc = 0, color = 0
+
+    Output: [[0,0,0],[0,0,0]]
+    """
+    if image[sr][sc] == color:
+        return image
+    
+    original_color: int = image[sr][sc]
+    ROWS, COLS = len(image), len(image[0])
+    neighbor_coords: List[tuple[int, int]] = [(-1, 0), (1, 0), (0, -1), (0, 1)] # up, down, left, right
+    queue: deque[tuple[int, int]] = deque([(sr, sc)])
+    image[sr][sc] = color
+
+    while queue:
+        cr, cc = queue.popleft()
+        for dr, dc in neighbor_coords:
+            nr, nc = (cr + dr), (cc + dc)
+            if(nr < 0 or nc < 0 or nr >= ROWS or nc >= COLS or image[nr][nc] != original_color):
+                continue
+            image[nr][nc] = color
+            queue.append((nr, nc))
+    return image
+
+def nearest_0_matrix(mat: List[List[Union[int , str]]]) -> List[List[Union[int, str]]]:
+    """
+    Given an m x n binary matrix mat, return the distance of the nearest 0 for each cell.
+
+    The distance between two cells sharing a common edge is 1.
+
+     
+
+    Example 1:
+
+
+    Input: mat = [[0,0,0],[0,1,0],[0,0,0]]
+    Output: [[0,0,0],[0,1,0],[0,0,0]]
+
+    Example 2:
+
+
+    Input: mat = [[0,0,0],[0,1,0],[1,1,1]]
+    Output: [[0,0,0],[0,1,0],[1,2,1]]
+ 
+    """
+    neighbor_coords: List[tuple[int, int]] = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+    ROWS, COLS = len(mat), len(mat[0])
+    queue = deque([])
+
+    for row in range(ROWS):
+        for col in range(COLS):
+            if mat[row][col] == 0:
+                queue.append((row, col))
+            else:
+                mat[row][col] = maxsize
+    while queue:
+        cr, cc = queue.popleft()
+
+        for dr, dc in neighbor_coords:
+            nr, nc = cr + dr, cc + dc
+            if(0 <= nr < ROWS and 0 <= nc < COLS and mat[nr][nc] == maxsize):
+                mat[nr][nc] = mat[cr][cc] + 1
+                queue.append((nr, nc))
+
+
+    return mat
+
+
+
+
+if __name__ == "__main__":
+    pass
