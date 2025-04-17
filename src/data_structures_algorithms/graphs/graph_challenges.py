@@ -1,4 +1,4 @@
-from typing import List, Union
+from typing import List, Union, Optional
 from collections import deque
 from sys import maxsize
 
@@ -40,7 +40,7 @@ class AENodeGraph:
         return array
 
 
-def num_islands(grid: List[List[str]]) -> int:
+def num_islands_med(grid: List[List[str]]) -> int:
     """
     Given an m x n 2D binary grid grid which represents a map of '1's (land) and '0's (water), return the number of islands.
 
@@ -128,7 +128,7 @@ def num_islands(grid: List[List[str]]) -> int:
 
 
 
-def can_visit_all_rooms(rooms: List[List[int]])->bool:
+def can_visit_all_rooms_med(rooms: List[List[int]])->bool:
     """
     There are n rooms labeled from 0 to n - 1 and all the rooms are locked except for room 0. Your goal is to visit all the rooms. However, you cannot enter a locked room without having its key.
 
@@ -180,7 +180,7 @@ def can_visit_all_rooms(rooms: List[List[int]])->bool:
 
     return len(rooms) == len(visited)
 
-def flood_fill(image: List[List[int]], sr: int, sc: int, color: int)->List[List[int]]:
+def flood_fill_ez(image: List[List[int]], sr: int, sc: int, color: int)->List[List[int]]:
     """
     You are given an image represented by an m x n grid of integers image, where image[i][j] represents the pixel value of the image. You are also given three integers sr, sc, and color. Your task is to perform a flood fill on the image starting from the pixel image[sr][sc].
 
@@ -223,7 +223,7 @@ def flood_fill(image: List[List[int]], sr: int, sc: int, color: int)->List[List[
             queue.append((nr, nc))
     return image
 
-def nearest_0_matrix(mat: List[List[Union[int , str]]]) -> List[List[Union[int, str]]]:
+def nearest_0_matrix_med(mat: List[List[Union[int , str]]]) -> List[List[Union[int, str]]]:
     """
     Given an m x n binary matrix mat, return the distance of the nearest 0 for each cell.
 
@@ -265,6 +265,54 @@ def nearest_0_matrix(mat: List[List[Union[int , str]]]) -> List[List[Union[int, 
 
 
     return mat
+
+class LeetNode:
+
+    def __init__(self, val:int = 0, neighbors = None):
+        self.val = val
+        self.neighbors = neighbors if neighbors is not None else []
+
+
+
+def copy_graph_med(node: Optional["LeetNode"]) -> Optional["LeetNode"]:
+    if node is None:
+        return None
+    copy_map_dfs = {}
+    copy_map_bfs = {}
+    def bfs(node: "LeetNode") -> "LeetNode":
+        
+        copy_map_bfs[node] = LeetNode(node.val)
+        queue = deque([node])
+
+        while queue:
+
+            current = queue.popleft()
+
+            for neighbor in current.neighbors:
+                if neighbor not in copy_map_bfs:
+                    copy_map_bfs[neighbor] = LeetNode(neighbor.val)
+                    queue.append(neighbor)
+                copy_map_bfs[current].neighbors.append(copy_map_bfs[neighbor])
+
+        return copy_map_bfs[node]
+    
+    def dfs_recursive(node: "LeetNode") -> "LeetNode":
+        if node in copy_map_dfs:
+            return copy_map_dfs[node]
+
+        node_copy = LeetNode(node.val)
+        copy_map_dfs[node] = node_copy
+
+        for neighbor in node.neighbors:
+            node_copy.neighbors.append(dfs_recursive(neighbor))
+        return node_copy
+
+    
+
+    bfs_result = bfs(node)
+    dfs_result = dfs_recursive(node)
+
+    return bfs_result
 
 
 
