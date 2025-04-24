@@ -161,6 +161,13 @@ class AdjacencyList:
 
         return visited, parent, distances, traversal_order
 
+    def dfs_recursive(self, start_vertex):
+        if start_vertex not in self.graph:
+            print("Start Vertex not in graph")
+
+        visited = set()
+
+
     def dfs_iterative(self, start_vertex):
         
         visited = set()
