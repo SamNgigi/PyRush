@@ -166,6 +166,24 @@ class AdjacencyList:
             print("Start Vertex not in graph")
 
         visited = set()
+        parent = {start_vertex: None}
+        distances = {start_vertex:0}
+        traversal_order = []
+
+        def dfs_helper(vertex):
+            visited.add(vertex)
+
+            traversal_order.append(vertex)
+            for neighbor, _ in self.graph.get(vertex, []):
+                if neighbor not in visited:
+                    parent[neighbor] = vertex
+                    distances[neighbor] = distances[vertex] + 1
+                    dfs_helper(neighbor)
+        
+        dfs_helper(start_vertex)
+
+        return visited, parent, distances, traversal_order
+
 
 
     def dfs_iterative(self, start_vertex):
