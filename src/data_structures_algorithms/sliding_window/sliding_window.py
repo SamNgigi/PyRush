@@ -1,3 +1,5 @@
+from collections import Counter
+
 def check_inclusion_array(s1:str, s2:str) -> bool:
     """
     Given two strings s1 and s2, return true if s2 contains a permutation of s1, or false otherwise.
@@ -49,3 +51,25 @@ def check_inclusion_array(s1:str, s2:str) -> bool:
 
 
     return False
+
+def check_inclusion_counter(s1: str, s2: str) -> bool:
+    if len(s1) > len(s2): return False
+    
+    window_size: int = len(s1)
+    left, right = 0, window_size
+
+    s1_counts, s2_counts = Counter(s1), Counter(s2)
+
+    if s1_counts == s2_counts: return True
+
+    while right < len(s2):
+        s2_counts[s2[left]] -= 1
+        s2_counts[s2[right]] += 1
+
+        if s1_counts == s2_counts: return True
+        
+        left += 1
+        right += 1
+
+    return False
+
