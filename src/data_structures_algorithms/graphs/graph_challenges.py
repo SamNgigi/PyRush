@@ -3,42 +3,6 @@ from collections import deque
 from sys import maxsize
 
 
-class AENodeGraph:
-
-    def __init__(self, name):
-        self.children = []
-        self.name = name
-
-    def add_child(self, name):
-        self.children.append(AENodeGraph(name))
-        return self
-    
-    def depth_first_search_recursive(self, array):
-        array.append(self.name)
-        for child in self.children:
-            child.depth_first_search(array)
-        return array
-
-    def depth_first_search_iterative(self, array):
-        stack = deque([self])
-
-        while stack:
-            current = stack.pop()
-            array.append(current.name)
-            for child in reversed(current.children):
-                stack.append(child)
-        return array
-    
-    def breadth_first_search(self, array):
-        queue = deque([self])
-
-        while queue:
-            current = queue.popleft()
-            array.append(current.name)
-            for child in current.children:
-                queue.append(child)
-        return array
-
 
 def num_islands_med(grid: List[List[str]]) -> int:
     """
