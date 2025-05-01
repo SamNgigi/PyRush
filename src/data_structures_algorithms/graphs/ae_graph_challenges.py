@@ -1,3 +1,4 @@
+from typing import List
 from collections import deque
 
 
@@ -67,7 +68,7 @@ class AENodeGraph:
                 queue.append(child)
         return array
 
-def has_single_cycle(array: list) -> bool:
+def has_single_cycle_med(array: list) -> bool:
     """
     You're given an array of integers where each integer represents a jump of its
     value in the array. For instance, the integer 2 represents a jump
@@ -110,4 +111,85 @@ def has_single_cycle(array: list) -> bool:
             break
 
     return visited_elements == len(array)
+
+def river_sizes_med(matrix: List[List[int]]) -> List[int]:
+    """
+        You're given a two-dimensional array (a matrix) of potentially unequal height
+
+        and width containing only 0s and 1s. Each
+        0 represents land, and each 1 represents part of a
+        river. A river consists of any number of 1s that are either
+        horizontally or vertically adjacent (but not diagonally adjacent). The number
+
+        of adjacent 1s forming a river determine its size.
+
+
+        Note that a river can twist. In other words, it doesn't have to be a straight
+
+        vertical line or a straight horizontal line; it can be L-shaped, for example.
+
+
+
+        Write a function that returns an array of the sizes of all rivers represented
+
+        in the input matrix. The sizes don't need to be in any particular order.
+
+        Sample Input
+        matrix = [
+          [1, 0, 0, 1, 0],
+          [1, 0, 1, 0, 0],
+          [0, 0, 1, 0, 1],
+          [1, 0, 1, 0, 1],
+          [1, 0, 1, 1, 0],
+        ]
+
+        Sample Output
+        [1, 2, 2, 2, 5] // The numbers could be ordered differently.
+
+
+        // The rivers can be clearly seen here:
+        // [
+        //   [1,  ,  , 1,  ],
+        //   [1,  , 1,  ,  ],
+        //   [ ,  , 1,  , 1],
+        //   [1,  , 1,  , 1],
+        //   [1,  , 1, 1,  ],
+        // ]
+
+    """
+    
+    ROWS, COLS = len(matrix), len(matrix[0])
+    neighbors = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+    visited = set()
+    sizes_array = []
+
+    def bfs(row, col):
+        queue = deque([(row, col)])
+        visited.add((row, col))
+        size = 0
+
+        while queue:
+            cr, cc = queue.popleft()
+            size += 1
+            for r, c in neighbors:
+                nr, nc = cr + r, cc + c
+                if(
+                    0 <= nr < ROWS and 
+                    0 <= nc < COLS and
+                    matrix[nr][nc] == 1 and
+                    (nr, nc) not in visited
+                ):
+                    queue.append((nr, nc))
+                    visited.add((nr, nc))
+
+        sizes_array.append(size)
+
+    for row in range(ROWS):
+        for col in range(COLS):
+            if(matrix[row][col] == 1 and (row, col) not in visited):
+                bfs(row, col)
+
+    return sizes_array
+
+
 

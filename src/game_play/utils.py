@@ -23,37 +23,45 @@ def strip_html_tags(html):
 if __name__ == "__main__":
 
     html_snippet = """
-    <div class="html">
-    <p>
-      You're given a <span>Node</span> class that has a <span>name</span> and an
-      array of optional <span>children</span> nodes. When put together, nodes form
-      an acyclic tree-like structure.
-    </p>
-    <p>
-      Implement the <span>depthFirstSearch</span> method on the
-      <span>Node</span> class, which takes in an empty array, traverses the tree
-      using the Depth-first Search approach (specifically navigating the tree from
-      left to right), stores all of the nodes' names in the input array, and returns
-      it.
-    </p>
-    <p>
-      If you're unfamiliar with Depth-first Search, we recommend watching the
-      Conceptual Overview section of this question's video explanation before
-      starting to code.
-    </p>
-    <h3>Sample Input</h3>
-    <pre><span class="CodeEditor-promptParameter">graph</span> = A
-         /  | \\      
-        B   C   D
-       /\\     / \     
-      E   F   G   H
-         / \\   \\        
-        I   J   K
-    </pre>
-    <h3>Sample Output</h3>
-    <pre>["A", "B", "E", "F", "I", "J", "C", "D", "G", "K", "H"]
-    </pre>
-    </div>
+<div class="html">
+<p>
+  You're given a two-dimensional array (a matrix) of potentially unequal height
+  and width containing only <span>0</span>s and <span>1</span>s. Each
+  <span>0</span> represents land, and each <span>1</span> represents part of a
+  river. A river consists of any number of <span>1</span>s that are either
+  horizontally or vertically adjacent (but not diagonally adjacent). The number
+  of adjacent <span>1</span>s forming a river determine its size.
+</p>
+<p>
+  Note that a river can twist. In other words, it doesn't have to be a straight
+  vertical line or a straight horizontal line; it can be L-shaped, for example.
+</p>
+<p>
+  Write a function that returns an array of the sizes of all rivers represented
+  in the input matrix. The sizes don't need to be in any particular order.
+</p>
+<h3>Sample Input</h3>
+<pre><span class="CodeEditor-promptParameter">matrix</span> = [
+  [1, 0, 0, 1, 0],
+  [1, 0, 1, 0, 0],
+  [0, 0, 1, 0, 1],
+  [1, 0, 1, 0, 1],
+  [1, 0, 1, 1, 0],
+]
+</pre>
+<h3>Sample Output</h3>
+<pre>[1, 2, 2, 2, 5] <span class="CodeEditor-promptComment">// The numbers could be ordered differently.</span>
+
+<span class="CodeEditor-promptComment">// The rivers can be clearly seen here:</span>
+<span class="CodeEditor-promptComment">// [</span>
+<span class="CodeEditor-promptComment">//   [1,  ,  , 1,  ],</span>
+<span class="CodeEditor-promptComment">//   [1,  , 1,  ,  ],</span>
+<span class="CodeEditor-promptComment">//   [ ,  , 1,  , 1],</span>
+<span class="CodeEditor-promptComment">//   [1,  , 1,  , 1],</span>
+<span class="CodeEditor-promptComment">//   [1,  , 1, 1,  ],</span>
+<span class="CodeEditor-promptComment">// ]</span>
+</pre>
+</div>
     """
     plain_text = strip_html_tags(html_snippet)
     print(plain_text)
