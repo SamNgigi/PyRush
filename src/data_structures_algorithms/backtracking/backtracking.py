@@ -34,7 +34,7 @@ def array_subset(nums: List[int]) -> List[List[int]]:
         helper(idx + 1, subset)
         # Pick a number and recurse
         subset.append(nums[idx])
-        helper(idx+1, subset)
+        helper(idx + 1, subset)
         # Backtrack and undo picking
         subset.pop()
 
