@@ -126,3 +126,5 @@ Let's trace the execution and how the stack frame changes. A stack frame holds t
 * The `pop()` operation on the `subset` list happens *before* a frame is popped (specifically, after the "include" recursive call returns). This modifies the list object *referenced by the parent frame*, ensuring that the `subset` is correctly restored to its state before the current level's "include" decision was made.
 
 This step-by-step process, where at each element you make a choice and recursively solve the rest of the problem, and then undo your choice (`pop()`) to explore other possibilities, is the essence of backtracking for problems like generating subsets or permutations. The stack implicitly manages the state of the problem (which choices have been made) as you explore the decision tree.
+
+![arr_subset](./arr_subset.png)
