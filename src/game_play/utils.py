@@ -25,43 +25,18 @@ if __name__ == "__main__":
     html_snippet = """
 <div class="html">
 <p>
-  You're given a two-dimensional array (a matrix) of potentially unequal height
-  and width containing only <span>0</span>s and <span>1</span>s. Each
-  <span>0</span> represents land, and each <span>1</span> represents part of a
-  river. A river consists of any number of <span>1</span>s that are either
-  horizontally or vertically adjacent (but not diagonally adjacent). The number
-  of adjacent <span>1</span>s forming a river determine its size.
-</p>
-<p>
-  Note that a river can twist. In other words, it doesn't have to be a straight
-  vertical line or a straight horizontal line; it can be L-shaped, for example.
-</p>
-<p>
-  Write a function that returns an array of the sizes of all rivers represented
-  in the input matrix. The sizes don't need to be in any particular order.
+  Write a function that takes in a non-empty array of integers and returns the
+  maximum sum that can be obtained by summing up all of the integers in a
+  non-empty subarray of the input array. A subarray must only contain adjacent
+  numbers (numbers next to each other in the input array).
 </p>
 <h3>Sample Input</h3>
-<pre><span class="CodeEditor-promptParameter">matrix</span> = [
-  [1, 0, 0, 1, 0],
-  [1, 0, 1, 0, 0],
-  [0, 0, 1, 0, 1],
-  [1, 0, 1, 0, 1],
-  [1, 0, 1, 1, 0],
-]
+<pre><span class="CodeEditor-promptParameter">array</span> = [3, 5, -9, 1, 3, -2, 3, 4, 7, 2, -9, 6, 3, 1, -5, 4]
 </pre>
 <h3>Sample Output</h3>
-<pre>[1, 2, 2, 2, 5] <span class="CodeEditor-promptComment">// The numbers could be ordered differently.</span>
-
-<span class="CodeEditor-promptComment">// The rivers can be clearly seen here:</span>
-<span class="CodeEditor-promptComment">// [</span>
-<span class="CodeEditor-promptComment">//   [1,  ,  , 1,  ],</span>
-<span class="CodeEditor-promptComment">//   [1,  , 1,  ,  ],</span>
-<span class="CodeEditor-promptComment">//   [ ,  , 1,  , 1],</span>
-<span class="CodeEditor-promptComment">//   [1,  , 1,  , 1],</span>
-<span class="CodeEditor-promptComment">//   [1,  , 1, 1,  ],</span>
-<span class="CodeEditor-promptComment">// ]</span>
+<pre>19 <span class="CodeEditor-promptComment">// [1, 3, -2, 3, 4, 7, 2, -9, 6, 3, 1]</span>
 </pre>
 </div>
-    """
+"""
     plain_text = strip_html_tags(html_snippet)
     print(plain_text)

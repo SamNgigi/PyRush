@@ -14,9 +14,10 @@ function show_usage {
   echo -e "  ./run.sh [options]"
   echo
   echo -e "${YELLOW}Options:${NC}"
-  echo -e "  --app, -a       Run the application"
-  echo -e "  --test, -t      Run the tests"
-  echo -e "  --help, -h      Show this help message"
+  echo -e "  --app,   -a       Run the application"
+  echo -e "  --strip, -s       Run the strip html"
+  echo -e "  --test,  -t       Run the tests"
+  echo -e "  --help,  -h       Show this help message"
   echo
   echo -e "${YELLOW}Examples:${NC}"
   echo -e "  .run.sh -a      # Run the application only"
@@ -30,6 +31,11 @@ function show_usage {
 function run_app {
   echo -e "${GREEN}Running application...${NC}"
   python -m src.main
+}
+
+function strip_html {
+  echo -e "${GREEN}Stripping html from ae challenge...${NC}"
+  python -m src.game_play.utils
 }
 
 # Function to run the tests
@@ -59,6 +65,10 @@ while [[ $# -gt 0 ]]; do
           RUN_TESTS=true
           shift
           ;;
+      --strip|-s)
+          strip_html
+          exit 0
+          ;;
       --help|-h)
           show_usage
           exit 0
@@ -79,7 +89,7 @@ fi
 
 
 if $RUN_TESTS; then
-  run_app
+  run_tests
 fi
 
 exit 0
