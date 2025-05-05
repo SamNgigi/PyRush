@@ -76,6 +76,7 @@ def ae_dijkstras_algorithm(start: int, edges) -> List[int | float]:
     """
     num_vertices = len(edges)
     min_distances = [float('inf') for _ in range(num_vertices)]
+    min_distances[start] = 0
     visited = set()
     def get_vertex_with_min_distance(distances: List[int|float] , visited: set):
         min_distance = float('inf')
