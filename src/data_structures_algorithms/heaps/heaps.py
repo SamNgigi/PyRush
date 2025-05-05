@@ -42,7 +42,7 @@ class AEMinHeap:
     def build_heap(self, array: List[int]) -> List[int]:
         first_parent =(len(array) // 2) - 1 # -2 if to faciliate flooring of both children accurately
         for current_idx in reversed(range(first_parent + 1)):
-            self.sift_down(current_idx, len(array) - 1, array)
+            self.sift_down(current_idx, len(array), array)
         return array
 
     def sift_down(self, current_idx: int, end_idx: int, heap: List[int]):
@@ -77,8 +77,11 @@ class AEMinHeap:
         if not self.heap: return -1
         return self.heap[0]
 
-    def remove(self):
-        pass
+    def remove(self) -> int: # basically removing the smallest value i.e popleft
+        self.swap(0, len(self.heap) - 1, self.heap)
+        current_min = self.heap.pop()
+        self.sift_down(0, len(self.heap), self.heap)
+        return current_min
 
     def insert(self, value: int):
         self.heap.append(value)
