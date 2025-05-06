@@ -199,7 +199,7 @@ class AEMinHeap_4_dijkstras_algorithm:
         self.sift_up(self.vertex_map[vertex], self.heap)
 
 
-def topological_sort(jobs: List[int], deps: List[List[int]]) -> List[int]:
+def ae_topological_sort(jobs: List[int], deps: List[List[int]]) -> List[int]:
     """
     You're given a list of arbitrary jobs that need to be completed; these jobs
     are represented by distinct integers. You're also given a list of dependencies. A
@@ -224,8 +224,18 @@ def topological_sort(jobs: List[int], deps: List[List[int]]) -> List[int]:
     job_states = {job: UNCOMPLETED for job in jobs}
     job_order = []
 
+    job_set = set(jobs)
+
     for dep, job in deps:
-        adj_list[job].append(dep)
+        # These if statement address edge case of when
+        # a dependency is not part of the jobs we need
+        # to do
+        if job in job_set:
+            if dep in job_set:
+                adj_list[job].append(dep)
+            else:
+                return []
+        pass
     
     def dfs(job):
         current_job_state = job_states[job]
