@@ -219,7 +219,36 @@ def topological_sort(jobs: List[int], deps: List[List[int]]) -> List[int]:
     Sample Output
     [1, 4, 3, 2] or [4, 1, 3, 2] 
     """
+    UNCOMPLETED, COMPLETING, COMPLETED = 0, 1, 2
+    adj_list = {job: [] for job in jobs}
+    job_states = {job: UNCOMPLETED for job in jobs}
     job_order = []
+
+    for dep, job in deps:
+        adj_list[job].append(dep)
+    
+    def dfs(job):
+        current_job_state = job_states[job]
+
+        # Cycle detected. We cannot finish this job because depencing is also completing
+        if current_job_state == COMPLETING:
+            return False
+        if current_job_state == COMPLETED:
+            return True
+        
+        job_states[job] = COMPLETING
+        for dep in adj_list[job]:
+            if not dfs(dep): return False
+
+        job_states[job] = COMPLETED
+        job_order.append(job)
+        return True
+
+    for job in jobs:
+        if job_states[job] == UNCOMPLETED:
+            if not dfs(job): return []
+
+
     return job_order
 
 

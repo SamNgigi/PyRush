@@ -525,4 +525,7 @@ def shortest_path_to_get_food_med():
 
 
 if __name__ == "__main__":
-    pass
+    res1 = can_finish_course_schedule(numCourses = 2, prerequisites=[[0, 1]])
+    res2 = can_finish_course_schedule(numCourses = 2, prerequisites=[[0, 1],[1, 0]])
+    print(f"res1: {res1}")
+    print(f"res2: {res2}")
