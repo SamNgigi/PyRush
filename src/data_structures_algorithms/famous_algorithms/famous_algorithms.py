@@ -1,5 +1,5 @@
 from sys import maxsize
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 
 
 def ae_kadanes_algorithm(array: List[int]):
@@ -119,14 +119,17 @@ class AEMinHeap_4_dijkstras_algorithm:
         min_distance_heap.update_vertex(start, 0)
 
         while not min_distance_heap.empty():
-            vertex, current_min_distance = min_distance_heap.pop()
-            if current_min_distance == maxsize:
-                break
-            for destination, distance in edges[vertex]:
-                new_path_distance = current_min_distance + distance
-                if new_path_distance < min_distances[destination]:
-                    min_distances[destination] = new_path_distance
-                    min_distance_heap.update_vertex(destination, distance)
+            try:
+                vertex, current_min_distance = min_distance_heap.pop()
+                if current_min_distance == maxsize:
+                    break
+                for destination, distance in edges[vertex]:
+                    new_path_distance = current_min_distance + distance
+                    if new_path_distance < min_distances[destination]:
+                        min_distances[destination] = new_path_distance
+                        min_distance_heap.update_vertex(destination, new_path_distance)
+            except IndexError:
+                print("Attempted to pop from an empty heap")
 
 
         return  list(map(lambda x: -1 if x == maxsize else x, min_distances))
@@ -174,7 +177,9 @@ class AEMinHeap_4_dijkstras_algorithm:
     def peek(self) -> tuple:
         return self.heap[0]
 
-    def pop(self):
+    def pop(self) -> Tuple[int, int]:
+        if self.empty():
+            raise IndexError("Cannot pop from an empty heap")
         self.swap(0, len(self.heap)-1, self.heap)
         vertex, min_distance = self.heap.pop()
         self.vertex_map.pop(vertex)
