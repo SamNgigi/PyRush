@@ -1,3 +1,4 @@
+# CSES Problem Set https://cses.fi/problemset/list/
 def weird_algorithm():
     """
     Consider an algorithm that takes as input a positive integer n. If n is even, the algorithm divides it by two, and if n is odd, the algorithm multiplies it by three and adds one. The algorithm repeats this, until n is one. For example, the sequence for n=3 is as follows:
@@ -9,7 +10,7 @@ def weird_algorithm():
     Print a line that contains all values of n during the algorithm.
     Constraints
 
-    1 \le n \le 10^6
+    1 \\le  \\le 10^6
 
     Example
     Input:
@@ -27,5 +28,37 @@ def weird_algorithm():
             n = n*3+1
         print(n, end="")
 
+
+def missing_number():
+    """
+    You are given all numbers between 1,2,\\ldots,n except one. Your task is to find the missing number.
+    Input
+    The first input line contains an integer n.
+    The second line contains n-1 numbers. Each number is distinct and between 1 and n (inclusive).
+    Output
+    Print the missing number.
+    Constraints
+
+    2 \\le n \\le 2 \\cdot 10^5
+
+    Example
+    Input:
+    5
+    2 3 1 5
+
+    Output:
+    4
+    """
+    n: int = int(input())
+    nums = input()
+    nums_sum = sum(int(i) for i in nums.split())
+    n_sum = sum(range(n+1))
+    print(n_sum - nums_sum)
+
+
+
+
+
+
 if __name__ == "__main__":
-    weird_algorithm()
+    missing_number()
